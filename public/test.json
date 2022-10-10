@@ -1,0 +1,34 @@
+{
+    "root": [
+        {
+            "key": "0",
+            "label": "Shelf",
+            "data": "Shelf",
+            "icon": "pi pi-fw pi-book",
+            "children": [
+                {
+                    "key": "0-0",
+                    "label": "Bookshelf",
+                    "data": "Bookshelf",
+                    "icon": "pi pi-fw pi-server",
+                    "children": [
+                        {
+                            "key": "0-0-0",
+                            "label": "Room",
+                            "icon": "pi pi-fw pi-stop",
+                            "data": "Room",
+                            "children": [
+                                {
+                                    "key": "0-0-0-0",
+                                    "label": "Building",
+                                    "icon": "pi pi-fw pi-home",
+                                    "data": "Building"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

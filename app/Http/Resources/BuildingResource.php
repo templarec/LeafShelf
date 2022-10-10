@@ -1,0 +1,25 @@
+<?php
+
+    namespace App\Http\Resources;
+
+    use Illuminate\Http\Resources\Json\JsonResource;
+
+    class BuildingResource extends JsonResource
+    {
+        /**
+         * Transform the resource into an array.
+         *
+         * @param \Illuminate\Http\Request $request
+         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+         */
+        public function toArray($request)
+        {
+            return [
+                'id' => $this->id,
+                'key' => '0-0-0-0',
+                'label' => $this->name,
+                'icon' => 'pi pi-fw pi-home',
+                'data' => $this->name,
+            ];
+        }
+    }
