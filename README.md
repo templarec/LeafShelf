@@ -1,5 +1,10 @@
 # LeafShelf
 
+![Laravel](https://img.shields.io/badge/Laravel-10-red)
+![Vue](https://img.shields.io/badge/Vue-3-green)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Status](https://img.shields.io/badge/status-active-success)
+
 LeafShelf is a personal library management web application designed to organize physical books using a hierarchical location system.
 
 The application allows users to catalog books, assign them to real-world shelves, and quickly retrieve them using ISBN lookup and barcode scanning.
@@ -23,6 +28,22 @@ The application allows users to catalog books, assign them to real-world shelves
     - OpenLibrary fallback with local caching
 
 ---
+
+---
+
+## Screenshots
+
+### Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+### Book Insertion
+
+![Book Insert](screenshots/book-insert.png)
+
+### Library Structure
+
+![Library Tree](screenshots/library-tree.png)
 
 ## Tech Stack
 
@@ -62,6 +83,25 @@ Building → Room → Bookshelf → Shelf → Book
 
 ---
 
+## Project Structure
+
+app/
+├── Http
+│ ├── Controllers
+│ └── Resources
+├── Models
+
+resources/
+├── js
+│ ├── Pages
+│ ├── Components
+│ └── Layouts
+
+routes/
+└── web.php
+
+---
+
 ## Main Workflow
 
 1. Select a **shelf location**
@@ -85,6 +125,19 @@ The project emphasizes:
 - integration with external book metadata providers
 
 ---
+
+## Example API Request
+
+## Retrieve book metadata via ISBN:
+
+GET /api/books/isbn/9780141182636
+Response:
+{
+"title": "The Great Gatsby",
+"authors": ["F. Scott Fitzgerald"],
+"publisher": "Scribner",
+"isbn": "9780141182636"
+}
 
 ## Installation
 
