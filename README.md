@@ -1,3 +1,5 @@
+> Personal project developed to manage a physical book collection using barcode scanning and hierarchical location tracking.
+
 # LeafShelf
 
 ![Laravel](https://img.shields.io/badge/Laravel-10-red)
