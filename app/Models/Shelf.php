@@ -8,13 +8,26 @@ use Illuminate\Database\Eloquent\Model;
 class Shelf extends Model
 {
     use HasFactory;
-    public function books(){
+
+    protected $fillable = [
+        'name',
+        'bookshelf_id',
+    ];
+
+    public function books()
+    {
         return $this->hasMany(Book::class);
     }
-    public function bookshelves(){
+
+    public function bookshelf()
+    {
         return $this->belongsTo(Bookshelf::class, 'bookshelf_id');
     }
-    static function getShelves($idBookshelf){
-        return Shelf::where('bookshelf_id', $idBookshelf)->get();
+
+    public static function getShelves(int $bookshelfId)
+    {
+        return self::query()
+            ->where('bookshelf_id', $bookshelfId)
+            ->get();
     }
 }

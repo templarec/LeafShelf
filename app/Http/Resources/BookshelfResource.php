@@ -1,29 +1,34 @@
 <?php
 
-    namespace App\Http\Resources;
+namespace App\Http\Resources;
 
-    use Illuminate\Http\Resources\Json\JsonResource;
+use App\Models\Bookshelf;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-    class BookshelfResource extends JsonResource
+class BookshelfResource extends JsonResource
+{
+    protected $selectable;
+
+    public function selectable($value)
     {
-        /**
-         * Transform the resource into an array.
-         *
-         * @param \Illuminate\Http\Request $request
-         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
-         */
-        public function toArray($request)
-        {
-            return [
-                'id' => $this->id,
-                'key' => '0-0',
-                'label' => $this->name,
-                'data' => $this->name,
-                'icon' => 'pi pi-fw pi-server',
-                'children' => [RoomResource::make($this->rooms)],
-                $this->mergeWhen($this->whenLoaded('rooms'), [
-                    'children' => [RoomResource::make($this->rooms)],
-                ]),
-            ];
-        }
+        $this->selectable = $value;
+
+        return $this;
     }
+
+    public function toArray($request)
+    {
+        return [
+            'id' => $this->id,
+            'key' => 'bookshelf-' . $this->id,
+            'label' => $this->name,
+            'icon' => 'pi pi-fw pi-server',
+            'selectable' => $this->selectable,
+            'model' => Bookshelf::class,
+            'books_count' => (int) ($this->books_count ?? 0),
+            'children' => ShelfCollection::make(
+                $this->whenLoaded('shelves')
+            )->selectable($this->selectable),
+        ];
+    }
+}

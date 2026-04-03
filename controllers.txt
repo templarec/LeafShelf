@@ -1,0 +1,593 @@
+===== app/Http/Controllers/AuthorController.php =====
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\AuthorCollection;
+use App\Http\Resources\AutoriCollection;
+use App\Http\Resources\BookCollection;
+use App\Models\Author;
+use App\Models\Book;
+use Illuminate\Http\Request;
+
+class AuthorController extends Controller
+{
+    public function searchAutori(Request $request)
+    {
+        $searchterm = $request->searchtxt;
+
+        return new AutoriCollection(
+            Author::where('name', 'like', "%{$searchterm}%")
+                ->orWhere('surname', 'like', "%{$searchterm}%")
+                ->orderBy('surname', 'asc')
+                ->get()
+        );
+    }
+}
+
+===== app/Http/Controllers/BookController.php =====
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\BookCollection;
+use App\Http\Resources\ShelfCollection;
+use App\Http\Resources\AuthorCollection;
+use App\Http\Resources\ShelfResource;
+use App\Models\Author;
+use App\Models\Book;
+use App\Models\Building;
+use App\Models\Shelf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class BookController extends Controller
+{
+    public function getLocation(Request $request)
+    {
+        return new ShelfResource(
+            Shelf::with('bookshelves.rooms.buildings')->find($request->idShelf)
+        );
+    }
+
+    public function saveBook(Request $request)
+    {
+        DB::transaction(function () use ($request) {
+            $book = Book::create([
+                'ISBN' => $request->isbn,
+                'title' => $request->title,
+                'publisher' => $request->publisher,
+                'pages' => $request->pages,
+                'img' => $request->img,
+                'shelf_id' => $request->shelfId,
+            ]);
+
+            foreach ($request->authors as $autori) {
+                $author = Author::firstOrCreate([
+                    'name' => trim($autori['nome']),
+                    'surname' => trim($autori['cognome']),
+                ]);
+
+                $book->authors()->syncWithoutDetaching($author->id);
+            }
+        });
+    }
+    public function all()
+    {
+        return new BookCollection(Book::all());
+
+    }
+
+    public function search(Request $request)
+    {
+        $searchterm = $request->searchtxt;
+
+        return new BookCollection(Book::where('title', 'like', "%{$searchterm}%")->get());
+    }
+
+    public function lastBooks()
+    {
+        return new BookCollection(Book::orderBy('id', 'desc')->take(5)->get());
+    }
+
+}
+
+===== app/Http/Controllers/BookshelfController.php =====
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\ScaffaleCollection;
+use App\Models\Book;
+use App\Models\Bookshelf;
+use Illuminate\Http\Request;
+
+class BookshelfController extends Controller
+{
+    public function getBookshelves(Request $request)
+    {
+        return ScaffaleCollection::make(Bookshelf::getBookshelves($request->idRoom));
+    }
+
+    public function addBS(Request $request)
+    {
+        $bs = Bookshelf::create([
+            'name' => $request->name,
+            'room_id' => $request->room_id,
+            'key' => $request->key."-".$request->index,
+        ]);
+    }
+}
+
+===== app/Http/Controllers/BuildingController.php =====
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\BuildingCollection;
+use App\Http\Resources\EdificioCollection;
+use App\Models\Building;
+use Illuminate\Http\Request;
+
+class BuildingController extends Controller
+{
+    public function getBuildings()
+    {
+        return EdificioCollection::make(Building::all());
+    }
+
+    public function addBuilding(Request $request)
+    {
+        $building = Building::create([
+            'name' => $request->name,
+            'key' => $request->key,
+        ]);
+    }
+}
+
+===== app/Http/Controllers/Controller.php =====
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller as BaseController;
+
+class Controller extends BaseController
+{
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+}
+
+===== app/Http/Controllers/ISBNQuery.php =====
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
+
+
+class ISBNQuery extends Controller
+{
+    function fetch(Request $request){
+
+        $isbn =  $request->isbn;
+        $url = "https://api2.isbndb.com/book/$isbn";
+        $key = env('ISBNdb_KEY');
+        $header = [
+            'Accept' => '*/*',
+            'Authorization' => $key,
+        ];
+
+        $response = Http::withHeaders($header)->get($url);
+        return [
+            $response->json()];
+    }
+}
+
+===== app/Http/Controllers/RoomController.php =====
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\BookshelfCollection;
+use App\Http\Resources\RoomCollection;
+use App\Http\Resources\RoomResource;
+use App\Http\Resources\ShelfCollection;
+use App\Http\Resources\StanzaCollection;
+use App\Models\Bookshelf;
+use App\Models\Room;
+use App\Models\Shelf;
+use Illuminate\Http\Request;
+
+class RoomController extends Controller
+{
+    public function getRooms(Request $request)
+    {
+        return StanzaCollection::make(Room::getRooms($request->idBuilding));
+    }
+
+    public function getAll()
+    {
+        return new ShelfCollection(Shelf::all());
+    }
+
+    public function addRoom(Request $request)
+    {
+        $building = Room::create([
+            'name' => $request->name,
+            'building_id' => $request->building_id,
+            'key' => $request->key."-".$request->index,
+        ]);
+
+
+    }
+}
+
+===== app/Http/Controllers/ShelfController.php =====
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\BookshelfResource;
+use App\Http\Resources\EdificioCollection;
+use App\Http\Resources\EdificioResource;
+use App\Http\Resources\RipianoResource;
+use App\Http\Resources\RoomResource;
+use App\Http\Resources\ScaffaleResource;
+use App\Http\Resources\ShelfResource;
+use App\Http\Resources\StanzaResource;
+use App\Models\Bookshelf;
+use App\Models\Building;
+use App\Models\Room;
+use App\Models\Shelf;
+use Illuminate\Http\Request;
+use ProtoneMedia\LaravelCrossEloquentSearch\Search;
+
+class ShelfController extends Controller
+{
+    public function getShelves(Request $request)
+    {
+        $response = Shelf::getShelves($request->idBookshelf);
+
+        return response()->json($response);
+    }
+
+    public function addShelf(Request $request)
+    {
+        $shelf = Shelf::create([
+            'name' => $request->name,
+            'bookshelf_id' => $request->bookshelf_id,
+        ]);
+
+        $shelf->update([
+            'key' => 'shelf-' . $shelf->id
+        ]);
+    }
+
+    public function getPosKey(Request $request)
+    {
+        if (!str_starts_with($request->keyRip, 'shelf-')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chiave ripiano non valida',
+            ], 400);
+        }
+
+        $id = (int) str_replace('shelf-', '', $request->keyRip);
+        $shelf = Shelf::find($id);
+
+        if (!$shelf) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ripiano non trovato',
+            ], 404);
+        }
+
+        return ShelfResource::make($shelf);
+    }
+
+    public function getPosKeyGlobal(Request $request)
+    {
+        $key = $request->keyRip;
+
+        $map = [
+            'room-' => [Room::class, StanzaResource::class, true, 'Room not found'],
+            'bookshelf-' => [Bookshelf::class, ScaffaleResource::class, true, 'Bookshelf not found'],
+            'shelf-' => [Shelf::class, ShelfResource::class, false, 'Shelf not found'],
+        ];
+
+        foreach ($map as $prefix => [$modelClass, $resourceClass, $selectable, $notFoundMessage]) {
+            if (str_starts_with($key, $prefix)) {
+                $id = (int) substr($key, strlen($prefix));
+                $model = $modelClass::find($id);
+
+                if (!$model) {
+                    return response()->json(['message' => $notFoundMessage], 404);
+                }
+
+                $resource = $resourceClass::make($model);
+
+                if ($selectable) {
+                    $resource->selectable(true);
+                }
+
+                return $resource;
+            }
+        }
+
+        return response()->json([
+            'message' => 'Chiave non valida'
+        ], 400);
+    }
+
+    public function delItem(Request $request)
+    {
+        try {
+            $allowedModels = [
+                Building::class,
+                Room::class,
+                Bookshelf::class,
+                Shelf::class,
+            ];
+
+            $model = $request->model;
+
+            if (!in_array($model, $allowedModels, true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Modello non consentito',
+                ], 400);
+            }
+
+            $delitem = $model::destroy($request->id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cancellato con successo',
+                'output' => $delitem,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function getTree(Request $request)
+{
+    $selectable = $request->boolean('selectable');
+
+    return EdificioCollection::make(
+        Building::query()
+            ->with('rooms.bookshelves.shelves')
+            ->get()
+    )->selectable($selectable);
+}
+}
+===== app/Models/Author.php =====
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Author extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'surname',
+    ];
+
+    public function books()
+    {
+        return $this->belongsToMany(Book::class, 'books_authors');
+    }
+
+    public static function findAuthor($name, $surname)
+    {
+        return self::where('name', trim($name))
+            ->where('surname', trim($surname))
+            ->first();
+    }
+}===== app/Models/Book.php =====
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Book extends Model
+{
+    use HasFactory;
+
+    protected $guarded =  [];
+
+    public function shelves(){
+        return $this->belongsTo(Shelf::class, 'shelf_id');
+    }
+    public function authors(){
+        return $this->belongsToMany(Author::class, 'books_authors');
+    }
+
+}
+===== app/Models/Bookshelf.php =====
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Bookshelf extends Model
+{
+    use HasFactory;
+    protected $guarded = [];
+    public function rooms(){
+        return $this->belongsTo(Room::class, 'room_id');
+    }
+    public function shelves(){
+        return $this->hasMany(Shelf::class);
+    }
+    static function getBookshelves($idRoom){
+        return Bookshelf::where('room_id', $idRoom)->get();
+    }
+}
+===== app/Models/Building.php =====
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Building extends Model
+{
+    use HasFactory;
+    protected $guarded = [];
+    public function rooms(){
+        return $this->hasMany(Room::class);
+    }
+}
+===== app/Models/Room.php =====
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Room extends Model
+{
+
+    use HasFactory;
+    protected $guarded = [];
+    public function buildings(){
+        return $this->belongsTo(Building::class, 'building_id');
+    }
+    public function bookshelves(){
+        return $this->hasMany(Bookshelf::class);
+    }
+
+    static function getRooms($idBuilding) {
+        return Room::where('building_id', $idBuilding)->get();
+    }
+}
+===== app/Models/Shelf.php =====
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Shelf extends Model
+{
+    use HasFactory;
+    protected $guarded = [];
+    public function books(){
+        return $this->hasMany(Book::class);
+    }
+    public function bookshelves(){
+        return $this->belongsTo(Bookshelf::class, 'bookshelf_id');
+    }
+    static function getShelves($idBookshelf){
+        return Shelf::where('bookshelf_id', $idBookshelf)->get();
+    }
+}
+===== app/Models/User.php =====
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+
+class User extends Authenticatable
+{
+    use HasApiTokens, HasFactory, Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+}
+===== app/Http/Resources/AuthorCollection.php =====
+
+===== app/Http/Resources/AuthorResource.php =====
+
+===== app/Http/Resources/AutoriCollection.php =====
+
+===== app/Http/Resources/AutoriResource.php =====
+
+===== app/Http/Resources/BookCollection.php =====
+
+===== app/Http/Resources/BookResource.php =====
+
+===== app/Http/Resources/BookshelfCollection.php =====
+
+===== app/Http/Resources/BookshelfResource.php =====
+
+===== app/Http/Resources/BuildingCollection.php =====
+
+===== app/Http/Resources/BuildingResource.php =====
+
+===== app/Http/Resources/EdificioCollection.php =====
+
+===== app/Http/Resources/EdificioResource.php =====
+
+===== app/Http/Resources/RipianoCollection.php =====
+
+===== app/Http/Resources/RipianoResource.php =====
+
+===== app/Http/Resources/RoomCollection.php =====
+
+===== app/Http/Resources/RoomResource.php =====
+
+===== app/Http/Resources/ScaffaleCollection.php =====
+
+===== app/Http/Resources/ScaffaleResource.php =====
+
+===== app/Http/Resources/ShelfCollection.php =====
+
+===== app/Http/Resources/ShelfResource.php =====
+
+===== app/Http/Resources/StanzaCollection.php =====
+
+===== app/Http/Resources/StanzaResource.php =====
+

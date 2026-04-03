@@ -1,25 +1,35 @@
 <?php
 
-    namespace App\Http\Resources;
+namespace App\Http\Resources;
 
-    use Illuminate\Http\Resources\Json\JsonResource;
+use App\Models\Building;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-    class BuildingResource extends JsonResource
+class BuildingResource extends JsonResource
+{
+    protected $selectable;
+
+    public function selectable($value)
     {
-        /**
-         * Transform the resource into an array.
-         *
-         * @param \Illuminate\Http\Request $request
-         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
-         */
-        public function toArray($request)
-        {
-            return [
-                'id' => $this->id,
-                'key' => '0-0-0-0',
-                'label' => $this->name,
-                'icon' => 'pi pi-fw pi-home',
-                'data' => $this->name,
-            ];
-        }
+        $this->selectable = $value;
+
+        return $this;
     }
+
+    public function toArray($request)
+    {
+        return [
+            'id' => $this->id,
+            'key' => 'building-' . $this->id,
+            'label' => $this->name,
+            'icon' => 'pi pi-fw pi-home',
+            'data' => $this->name,
+            'selectable' => $this->selectable,
+            'model' => Building::class,
+            'books_count' => (int) ($this->books_count ?? 0),
+            'children' => RoomCollection::make(
+                $this->whenLoaded('rooms')
+            )->selectable($this->selectable),
+        ];
+    }
+}

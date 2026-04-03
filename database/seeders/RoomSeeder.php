@@ -15,23 +15,32 @@ class RoomSeeder extends Seeder
      */
     public function run()
     {
-       $padova = [
-           'Soggiorno', 'Ingresso', 'Corridoio','Camera Lorenzo', 'Camera matrimoniale', 'Camera ospiti', 'Sottoscala', 'Ingresso taverna', 'Camera taverna', 'Cucina taverna'
-       ];
-       $udine = [
-           'Soggiorno', 'Studio'
-       ];
-
-       foreach ($padova as $item){
-           DB::table('rooms')->insert([
-              'name' => $item,
-              'building_id' => 1
-           ]);
-       }
-        foreach ($udine as $item){
+        $padova = [
+            'Soggiorno',
+            'Ingresso',
+            'Corridoio',
+            'Stanza Singola 1',
+            'Stanza Matrimoniale',
+            'Stanza Singola 2',
+        ];
+        $udine = [
+            'Soggiorno',
+            'Studio'
+        ];
+        $padovaId = DB::table('buildings')->where('name', 'PADOVA')->value('id');
+        $udineId = DB::table('buildings')->where('name', 'UDINE')->value('id');
+        foreach ($padova as $item) {
             DB::table('rooms')->insert([
                 'name' => $item,
-                'building_id' => 2
+                'building_id' => $padovaId,
+
+            ]);
+        }
+        foreach ($udine as $item) {
+            DB::table('rooms')->insert([
+                'key' => 'room-1',
+                'name' => 'Soggiorno',
+                'building_id' => 1,
             ]);
         }
     }

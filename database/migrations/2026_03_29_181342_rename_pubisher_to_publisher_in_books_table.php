@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -14,16 +13,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('books', function (Blueprint $table) {
-            $table->timestamps();
-            $table->softDeletes();
-        });
-        Schema::table('authors', function (Blueprint $table) {
-            $table->timestamps();
-            $table->softDeletes();
-        });
-        Schema::table('books_authors', function (Blueprint $table) {
-            $table->timestamps();
-            $table->softDeletes();
+            $table->renameColumn('pubisher', 'publisher');
         });
     }
 
@@ -34,6 +24,8 @@ return new class extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('books', function (Blueprint $table) {
+            $table->renameColumn('publisher', 'pubisher');
+        });
     }
 };

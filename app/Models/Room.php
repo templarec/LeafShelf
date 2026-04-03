@@ -8,14 +8,26 @@ use Illuminate\Database\Eloquent\Model;
 class Room extends Model
 {
     use HasFactory;
-    public function buildings(){
+
+    protected $fillable = [
+        'name',
+        'building_id',
+    ];
+
+    public function building()
+    {
         return $this->belongsTo(Building::class, 'building_id');
     }
-    public function bookshelves(){
+
+    public function bookshelves()
+    {
         return $this->hasMany(Bookshelf::class);
     }
 
-    static function getRooms($idBuilding) {
-        return Room::where('building_id', $idBuilding)->get();
+    public static function getRooms(int $buildingId)
+    {
+        return self::query()
+            ->where('building_id', $buildingId)
+            ->get();
     }
 }

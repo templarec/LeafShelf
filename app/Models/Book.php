@@ -9,13 +9,27 @@ class Book extends Model
 {
     use HasFactory;
 
-    protected $guarded =  [];
+    protected $fillable = [
+        'ISBN',
+        'title',
+        'publisher',
+        'pages',
+        'img',
+        'shelf_id',
+    ];
 
-    public function shelves(){
+    public function shelf()
+    {
         return $this->belongsTo(Shelf::class, 'shelf_id');
     }
-    public function authors(){
-        return $this->belongsToMany(Author::class, 'books_authors');
-    }
 
+    public function authors()
+    {
+        return $this->belongsToMany(
+            Author::class,
+            'books_authors',
+            'book_id',
+            'author_id'
+        );
+    }
 }

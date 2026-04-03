@@ -13,19 +13,22 @@ class ShelfSeeder extends Seeder
      * @return void
      */
     public function run()
-    {
-        $sh = [
-            'Primo ripiano', 'Secondo ripiano', 'Terzo ripiano'
-        ];
+{
+    $sh = [
+        'Primo ripiano',
+        'Secondo ripiano',
+        'Terzo ripiano'
+    ];
 
-        for ($i=1; $i<=12; $i++) {
-            foreach ($sh as $rip){
-                DB::table('shelves')->insert([
-                    'name' => $rip,
-                    'bookshelf_id' => $i
-                ]);
-            }
+    $bookshelves = DB::table('bookshelves')->get();
+
+    foreach ($bookshelves as $bookshelf) {
+        foreach ($sh as $rip) {
+            DB::table('shelves')->insert([
+                'name' => $rip,
+                'bookshelf_id' => $bookshelf->id
+            ]);
         }
-
     }
+}
 }

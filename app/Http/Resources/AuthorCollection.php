@@ -6,16 +6,10 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class AuthorCollection extends ResourceCollection
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
-     */
-    public static $wrap = 'authors';
-    public $collection = AuthorResource::class;
     public function toArray($request)
     {
-        return $this->collection;
+        return $this->collection->map(function (AuthorResource $resource) use ($request) {
+            return $resource->toArray($request);
+        })->all();
     }
 }

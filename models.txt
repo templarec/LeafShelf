@@ -1,0 +1,193 @@
+
+
+
+
+
+
+
+===== app/Models/Book.php =====
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Book extends Model
+{
+    use HasFactory;
+
+    protected $guarded =  [];
+
+    public function shelves(){
+        return $this->belongsTo(Shelf::class, 'shelf_id');
+    }
+    public function authors(){
+        return $this->belongsToMany(Author::class, 'books_authors');
+    }
+
+}
+
+===== app/Models/Room.php =====
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Room extends Model
+{
+
+    use HasFactory;
+    protected $guarded = [];
+    public function buildings(){
+        return $this->belongsTo(Building::class, 'building_id');
+    }
+    public function bookshelves(){
+        return $this->hasMany(Bookshelf::class);
+    }
+
+    static function getRooms($idBuilding) {
+        return Room::where('building_id', $idBuilding)->get();
+    }
+}
+
+===== app/Models/User.php =====
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+
+class User extends Authenticatable
+{
+    use HasApiTokens, HasFactory, Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+}
+
+===== app/Models/Building.php =====
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Building extends Model
+{
+    use HasFactory;
+    protected $guarded = [];
+    public function rooms(){
+        return $this->hasMany(Room::class);
+    }
+}
+
+===== app/Models/Author.php =====
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Author extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'surname',
+    ];
+
+    public function books()
+    {
+        return $this->belongsToMany(Book::class, 'books_authors');
+    }
+
+    public static function findAuthor($name, $surname)
+    {
+        return self::where('name', trim($name))
+            ->where('surname', trim($surname))
+            ->first();
+    }
+}
+===== app/Models/Shelf.php =====
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Shelf extends Model
+{
+    use HasFactory;
+    protected $guarded = [];
+    public function books(){
+        return $this->hasMany(Book::class);
+    }
+    public function bookshelves(){
+        return $this->belongsTo(Bookshelf::class, 'bookshelf_id');
+    }
+    static function getShelves($idBookshelf){
+        return Shelf::where('bookshelf_id', $idBookshelf)->get();
+    }
+}
+
+===== app/Models/Bookshelf.php =====
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Bookshelf extends Model
+{
+    use HasFactory;
+    protected $guarded = [];
+    public function rooms(){
+        return $this->belongsTo(Room::class, 'room_id');
+    }
+    public function shelves(){
+        return $this->hasMany(Shelf::class);
+    }
+    static function getBookshelves($idRoom){
+        return Bookshelf::where('room_id', $idRoom)->get();
+    }
+}
+

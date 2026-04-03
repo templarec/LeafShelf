@@ -9,7 +9,12 @@ class Building extends Model
 {
     use HasFactory;
 
-    public function rooms(){
+    protected $fillable = [
+        'name',
+    ];
+
+    public function rooms()
+    {
         return $this->hasMany(Room::class);
     }
 }

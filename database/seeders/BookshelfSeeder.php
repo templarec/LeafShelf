@@ -17,17 +17,30 @@ class BookshelfSeeder extends Seeder
     public function run()
     {
         $bs = [
-          'Mobile TV' => [1],
-          'Sopra scala' => [2],
-          'Libreria' => [3,4,5,6,7,8,9,10,11,12]
-
+            'Mobile TV' => ['Soggiorno'],
+            'Sopra scala' => ['Ingresso'],
+            'Libreria' => [
+                'Soggiorno',
+                'Ingresso',
+                'Corridoio',
+                'Stanza Singola 1',
+                'Stanza Matrimoniale',
+                'Stanza Singola 2'
+            ]
         ];
-        foreach ($bs as $lib => $index ){
-            foreach ($index as $id){
-                DB::table('bookshelves')->insert([
-                   'name' => $lib,
-                   'room_id' => $id
-                ]);
+        foreach ($bs as $lib => $rooms) {
+            foreach ($rooms as $roomName) {
+
+                $roomId = DB::table('rooms')
+                    ->where('name', $roomName)
+                    ->value('id');
+
+                if ($roomId) {
+                    DB::table('bookshelves')->insert([
+                        'name' => $lib,
+                        'room_id' => $roomId
+                    ]);
+                }
             }
         }
     }

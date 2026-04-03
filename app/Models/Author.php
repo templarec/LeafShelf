@@ -8,13 +8,25 @@ use Illuminate\Database\Eloquent\Model;
 class Author extends Model
 {
     use HasFactory;
-    protected $guarded =  [];
-    public function books(){
+
+    protected $fillable = [
+        'name',
+        'surname',
+    ];
+
+    public function books()
+    {
         return $this->belongsToMany(Book::class, 'books_authors');
     }
-    static function findAuthor($name, $surname){
-        return self::where('name', $name)
-            ->where('surname', $surname)->first();
 
+    public static function findAuthor(string $name, string $surname): ?Author
+    {
+        $name = trim($name);
+        $surname = trim($surname);
+
+        return self::query()
+            ->where('name', $name)
+            ->where('surname', $surname)
+            ->first();
     }
 }

@@ -1,0 +1,626 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
+class AuthorCollection extends ResourceCollection
+{
+    /**
+     * Transform the resource collection into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     */
+    public static $wrap = 'authors';
+    public $collection = AuthorResource::class;
+    public function toArray($request)
+    {
+        return $this->collection;
+    }
+}
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class AuthorResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     */
+    public function toArray($request)
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'surname' => $this->surname,
+            // 'books' =>
+            // 'books' => BookCollection::make($this->books),
+//            $this->mergeWhen($this->whenLoaded('books'), [
+//                'books' => BookCollection::make($this->books),
+//            ]),
+        ];
+    }
+}
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
+class AutoriCollection extends ResourceCollection
+{
+    /**
+     * Transform the resource collection into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     */
+    public static $wrap = 'authors';
+    public $collection = AutoriResource::class;
+    public function toArray($request)
+    {
+        return $this->collection;
+    }
+}
+<?php
+
+    namespace App\Http\Resources;
+
+    use Illuminate\Http\Resources\Json\JsonResource;
+
+    class AutoriResource extends JsonResource
+    {
+        /**
+         * Transform the resource into an array.
+         *
+         * @param \Illuminate\Http\Request $request
+         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+         */
+        public function toArray($request)
+        {
+            return [
+                'id' => $this->id,
+                'name' => $this->name,
+                'surname' => $this->surname,
+                'books' => BookCollection::make($this->books),
+                // 'books' => BookCollection::make($this->books),
+//            $this->mergeWhen($this->whenLoaded('books'), [
+//                'books' => BookCollection::make($this->books),
+//            ]),
+            ];
+        }
+    }
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
+class BookCollection extends ResourceCollection
+{
+    /**
+     * Transform the resource collection into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     */
+
+        public static $wrap = 'books';
+        public $collection = BookResource::class;
+        public function toArray($request)
+    {
+        return $this->collection;
+    }
+
+}
+<?php
+
+    namespace App\Http\Resources;
+
+    use App\Models\Author;
+    use Illuminate\Http\Resources\Json\JsonResource;
+
+    class BookResource extends JsonResource
+    {
+        /**
+         * Transform the resource into an array.
+         *
+         * @param \Illuminate\Http\Request $request
+         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+         */
+        public function toArray($request)
+        {
+            return [
+                'id' => $this->id,
+                'isbn' => $this->ISBN,
+                'title' => $this->title,
+                'publisher' => $this->publisher,
+                'pages' => $this->pages,
+                'img' => $this->img,
+                'authors' => AuthorCollection::make($this->authors),
+                $this->mergeWhen($this->whenLoaded('authors'), [
+                    'authors' => AuthorCollection::make($this->authors),
+                ]),
+                'location' => ShelfResource::make($this->shelves),
+                $this->mergeWhen($this->whenLoaded('shelves'), [
+                    'location' => ShelfResource::make($this->shelves),
+                ]),
+
+            ];
+        }
+
+    }
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
+class BookshelfCollection extends ResourceCollection
+{
+    /**
+     * Transform the resource collection into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     */
+    public static $wrap = 'bookshelves';
+    public $collection = BookshelfResource::class;
+    public function toArray($request)
+    {
+        return $this->collection;
+    }
+}
+<?php
+
+    namespace App\Http\Resources;
+
+    use Illuminate\Http\Resources\Json\JsonResource;
+
+    class BookshelfResource extends JsonResource
+    {
+        /**
+         * Transform the resource into an array.
+         *
+         * @param \Illuminate\Http\Request $request
+         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+         */
+        public function toArray($request)
+        {
+            return [
+                'id' => $this->id,
+                'key' => $this->key,
+                'label' => $this->name,
+                'data' => $this->name,
+                'icon' => 'pi pi-fw pi-server',
+                'children' => [RoomResource::make($this->rooms)],
+                $this->mergeWhen($this->whenLoaded('rooms'), [
+                    'children' => [RoomResource::make($this->rooms)],
+                ]),
+            ];
+        }
+    }
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
+class BuildingCollection extends ResourceCollection
+{
+    /**
+     * Transform the resource collection into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     */
+    public $collection = BuildingResource::class;
+    public function toArray($request)
+    {
+        return $this->collection;
+    }
+}
+<?php
+
+    namespace App\Http\Resources;
+
+    use Illuminate\Http\Resources\Json\JsonResource;
+
+    class BuildingResource extends JsonResource
+    {
+        /**
+         * Transform the resource into an array.
+         *
+         * @param \Illuminate\Http\Request $request
+         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+         */
+        public function toArray($request)
+        {
+            return [
+                'id' => $this->id,
+                'key' => $this->key,
+                'label' => $this->name,
+                'icon' => 'pi pi-fw pi-home',
+                'data' => $this->name,
+            ];
+        }
+    }
+<?php
+
+    namespace App\Http\Resources;
+
+    use Illuminate\Http\Resources\Json\ResourceCollection;
+
+    class EdificioCollection extends ResourceCollection
+    {
+        /**
+         * Transform the resource collection into an array.
+         *
+         * @param \Illuminate\Http\Request $request
+         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+         */
+        protected $selectable;
+
+        public function selectable($value)
+        {
+            $this->selectable = $value;
+
+            return $this;
+        }
+
+        public $collection = EdificioResource::class;
+
+        public function toArray($request)
+        {
+            return $this->collection->map(function (EdificioResource $resource) use ($request) {
+                return $resource->selectable($this->selectable)->toArray($request);
+            })->all();
+        }
+    }
+<?php
+
+    namespace App\Http\Resources;
+
+    use App\Models\Building;
+    use Illuminate\Http\Resources\Json\JsonResource;
+
+    class EdificioResource extends JsonResource
+    {
+        /**
+         * Transform the resource into an array.
+         *
+         * @param \Illuminate\Http\Request $request
+         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+         */
+        protected $selectable;
+
+        public function selectable($value)
+        {
+            $this->selectable = $value;
+
+            return $this;
+        }
+
+        public function toArray($request)
+        {
+
+            return [
+                'id' => $this->id,
+                'key' => 'building-' . $this->id,
+                'label' => $this->name,
+                'icon' => 'pi pi-fw pi-home',
+                'data' => $this->name,
+                'selectable' => false,
+                'children' => StanzaCollection::make($this->rooms)->selectable($this->selectable),
+                $this->mergeWhen($this->whenLoaded('rooms'), [
+                    'children' => StanzaCollection::make($this->rooms),
+                ]),
+            ];
+        }
+    }
+<?php
+
+    namespace App\Http\Resources;
+
+    use Illuminate\Http\Resources\Json\ResourceCollection;
+
+    class RipianoCollection extends ResourceCollection
+    {
+        /**
+         * Transform the resource collection into an array.
+         *
+         * @param \Illuminate\Http\Request $request
+         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+         */
+        public $collection = RipianoResource::class;
+
+        public function toArray($request)
+        {
+            return $this->collection;
+        }
+    }
+<?php
+
+    namespace App\Http\Resources;
+
+    use App\Models\Shelf;
+    use Illuminate\Http\Resources\Json\JsonResource;
+
+    class RipianoResource extends JsonResource
+    {
+        /**
+         * Transform the resource into an array.
+         *
+         * @param \Illuminate\Http\Request $request
+         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+         */
+        public function toArray($request)
+        {
+            return [
+                'id' => $this->id,
+                'key' => 'shelf-' . $this->id,
+                'label' => $this->name,
+                'icon' => 'pi pi-fw pi-book',
+                'selectable' => true,
+                'model' => Shelf::class,
+            ];
+        }
+    }
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
+class RoomCollection extends ResourceCollection
+{
+    /**
+     * Transform the resource collection into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     */
+    public static $wrap = 'rooms';
+    public $collection = RoomResource::class;
+    public function toArray($request)
+    {
+        return $this->collection;
+    }
+}
+<?php
+
+    namespace App\Http\Resources;
+
+    use Illuminate\Http\Resources\Json\JsonResource;
+
+    class RoomResource extends JsonResource
+    {
+        /**
+         * Transform the resource into an array.
+         *
+         * @param \Illuminate\Http\Request $request
+         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+         */
+
+        public function toArray($request)
+        {
+            return [
+                'id' => $this->id,
+                'key' => $this->key,
+                'label' => $this->name,
+                'data' => $this->name,
+                'icon' => 'pi pi-fw pi-stop',
+                'children' => [BuildingResource::make($this->buildings)],
+                $this->mergeWhen($this->whenLoaded('buildings'), [
+                    'children' => [BuildingResource::make($this->buildings)],
+                ]),
+            ];
+        }
+    }
+<?php
+
+    namespace App\Http\Resources;
+
+    use Illuminate\Http\Resources\Json\ResourceCollection;
+
+    class ScaffaleCollection extends ResourceCollection
+    {
+        /**
+         * Transform the resource collection into an array.
+         *
+         * @param \Illuminate\Http\Request $request
+         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+         */
+        public $collection = ScaffaleResource::class;
+
+        protected $selectable;
+
+        public function selectable($value)
+        {
+            $this->selectable = $value;
+
+            return $this;
+        }
+
+        public function toArray($request)
+        {
+            return $this->collection->map(function (ScaffaleResource $resource) use ($request) {
+                return $resource->selectable($this->selectable)->toArray($request);
+            })->all();
+        }
+    }
+<?php
+
+namespace App\Http\Resources;
+
+use App\Models\Bookshelf;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class ScaffaleResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     */
+    protected $selectable;
+
+    public function selectable($value)
+    {
+        $this->selectable = $value;
+
+        return $this;
+    }
+
+    public function toArray($request)
+    {
+        return [
+            'id' => $this->id,
+            'key' => 'bookshelf-' . $this->id,
+            'label' => $this->name,
+            'icon' => 'pi pi-fw pi-server',
+            'selectable' => $this->selectable,
+            'model' => Bookshelf::class,
+            'children' => RipianoCollection::make($this->shelves),
+            $this->mergeWhen($this->whenLoaded('shelves'), [
+                'children' => RipianoCollection::make($this->shelves),
+            ]),
+        ];
+    }
+}
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
+class ShelfCollection extends ResourceCollection
+{
+    /**
+     * Transform the resource collection into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     */
+    public static $wrap = 'root';
+    public $collection = ShelfResource::class;
+    public function toArray($request)
+    {
+        return $this->collection;
+    }
+}
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class ShelfResource extends JsonResource
+{
+    public function toArray($request)
+    {
+        $bookshelf = $this->bookshelves;
+        $room = $bookshelf?->rooms;
+        $building = $room?->buildings;
+
+        return [
+            $this->node($building, 'building', 'pi pi-fw pi-home', [
+                $this->node($room, 'room', 'pi pi-fw pi-stop', [
+                    $this->node($bookshelf, 'bookshelf', 'pi pi-fw pi-server', [
+                        $this->node($this, 'shelf', 'pi pi-fw pi-book'),
+                    ]),
+                ]),
+            ]),
+        ];
+    }
+
+    private function node($model, string $type, string $icon, array $children = []): array
+    {
+        return [
+            'id' => $model?->id,
+            'key' => $type . '-' . $model?->id,
+            'label' => $model?->name,
+            'data' => $model?->name,
+            'icon' => $icon,
+            'children' => $children,
+        ];
+    }
+}<?php
+
+    namespace App\Http\Resources;
+
+    use Illuminate\Http\Resources\Json\ResourceCollection;
+
+    class StanzaCollection extends ResourceCollection
+    {
+        /**
+         * Transform the resource collection into an array.
+         *
+         * @param \Illuminate\Http\Request $request
+         * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+         */
+        public $collection = StanzaResource::class;
+
+        protected $selectable;
+
+        public function selectable($value)
+        {
+            $this->selectable = $value;
+
+            return $this;
+        }
+
+        public function toArray($request)
+        {
+            return $this->collection->map(function (StanzaResource $resource) use ($request) {
+                return $resource->selectable($this->selectable)->toArray($request);
+            })->all();
+        }
+    }
+<?php
+
+namespace App\Http\Resources;
+
+use App\Models\Room;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class StanzaResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     */
+    protected $selectable;
+
+    public function selectable($value)
+    {
+        $this->selectable = $value;
+
+        return $this;
+    }
+
+    public function toArray($request)
+    {
+        return [
+            'id' => $this->id,
+            'key' => 'room-' . $this->id,
+            'label' => $this->name,
+            'icon' => 'pi pi-fw pi-stop',
+            'selectable' => $this->selectable,
+            'model' => Room::class,
+            'children' => ScaffaleCollection::make($this->bookshelves)->selectable($this->selectable),
+            $this->mergeWhen($this->whenLoaded('bookshelves'), [
+                'children' => ScaffaleCollection::make($this->bookshelves),
+            ]),
+        ];
+    }
+}
